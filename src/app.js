@@ -1,20 +1,28 @@
 const express = require("express");
 const app = express();
+const connectDB = require("./config/database");
+const cookieparser = require("cookie-parser");
+app.use(express.json());
+app.use(cookieparser());
 
-app.get("/user", (req, res) => {
-  res.send({ firstname: "Saradhi", lastname: "Bhumireddy" });
-});
-app.post("/user", (req, res) => {
-  res.send("Data has been posted");
-});
-app.delete("/user", (req, res) => {
-  res.send("Data has been deleted ");
-});
+const authRouter = require("./routes/auth");
+const profileRouter = require("./routes/profile");
+const connectionRouter = require("./routes/connection");
+const userRouter = require("./routes/user");
 
-app.use("/test", (req, res) => {
-  res.send("test path has called");
-});
+app.use("/", authRouter);
+app.use("/", profileRouter);
+app.use("/", connectionRouter);
+app.use("/", userRouter);
 
-app.listen(3000, () => {
-  console.log("Server has started");
-});
+connectDB()
+  .then(() => {
+    console.log("Connected to MongoDB");
+    app.listen(3000, () => {
+      console.log("Server has started");
+    });
+  })
+  .catch((err) => {
+    console.error("Error connecting to MongoDB", err);
+    process.exit(1);
+  });
